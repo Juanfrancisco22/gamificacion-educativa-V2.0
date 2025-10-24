@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamificación: Misión Épica 2.0 | La Aventura del Aprendizaje</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        /* ================= VARIABLES & RESET ================= */
+        :root {
+            --color-primary: #f9a825; /* Oro Brillante */
+            --color-secondary: #00bcd4; /* Azul Turquesa Dinámico */
+            --color-dark: #263238; /* Gris Oscuro para texto principal */
+            --color-light: #f5f5f5; /* Fondo Ultra Claro */
+            --color-success: #43a047; /* Verde Victoria */
+            --color-error: #e53935; /* Rojo Derrota */
+            --shadow-epic: 0 12px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--color-light);
+            color: var(--color-dark);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 { color: var(--color-dark); font-weight: 900; margin: 0.5em 0; }
+        a { text-decoration: none; color: var(--color-secondary); transition: color 0.3s; }
+        a:hover { color: var(--color-primary); }
+        
+        section {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: var(--shadow-epic);
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        
+        /* Contenido Multimedia / Imágenes Didácticas */
+        .didactic-img-container { text-align: center; margin: 40px 0; }
+        .didactic-img {
+            max-width: 100%;
+            width: 800px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 5px solid var(--color-primary);
+        }
+        
+        /* Estilos de la Puntuación y el Héroe (Sección superior) */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: var(--color-dark);
+            color: white;
+            border-radius: 15px;
+            border: 5px solid var(--color-primary);
+            margin-bottom: 50px;
+        }
+        #puntos { font-size: 2.5em; font-weight: 900; color: var(--color-primary); }
+        
+        .insignia { width: 80px; height: 80px; margin: 0 10px; opacity: 0.3; transition: all 0.6s ease; }
+        .insignia.ganada { opacity: 1; filter: drop-shadow(0 0 10px var(--color-primary)); transform: scale(1.1); }
+
+        /* Estilos de los Bloques de Juego */
+        .game-block {
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            border: 2px solid var(--color-secondary);
+            background: #e0f7fa; /* Fondo suave para destacar */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .boton-juego {
+            background: var(--color-primary);
+            color: var(--color-dark);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-top: 15px;
+        }
+        .boton-juego:hover { background: var(--color-dark); color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+        
+        .result-message { margin-top: 20px; font-weight: 900; font-size: 1.3em; padding: 10px; border-radius: 10px; }
+        
+        /* JUEGO: LABERINTO LÓGICO */
+        #logicMazeGrid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        .maze-cell {
+            background: #fff;
+            border: 2px solid var(--color-dark);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+        }
+        .maze-cell:hover { transform: scale(1.05); }
+        .maze-cell.correct { background: var(--color-success); color: white; pointer-events: none; }
+        .maze-cell.incorrect { background: var(--color-error); color: white; }
+        .maze-cell.current-step { border: 4px solid var(--color-primary); background: #ffe0b2; }
+
+        /* Estilos de Contenidos y Recursos */
+        .video-container {
+            margin: 30px auto;
+            text-align: left;
+            max-width: 800px;
+        }
+        .video-list, .platform-list {
+            list-style: none;
+            padding: 0;
+        }
+        .video-list li, .platform-list li {
+            margin-bottom: 15px;
+            border-left: 5px solid var(--color-secondary);
+            padding-left: 15px;
+        }
+        .video-list li a, .platform-list li a {
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        /* Estilos de la nueva sección de Recursos */
+        .resource-group {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap; /* Para responsividad */
+        }
+        .resource-column {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border-radius: 15px;
+            background: #fff3e0; /* Color claro para la sección de recursos */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .resource-column h4 {
+            color: var(--color-dark);
+            border-bottom: 3px solid var(--color-primary);
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* Media Queries para Responsividad */
+        @media(max-width: 768px){
+            #bienvenida h1 { font-size: 2.5em; }
+            section { padding: 20px; margin: 40px 10px; }
+            .scoreboard { flex-direction: column; padding: 20px; }
+            .insignia { width: 60px; height: 60px; margin: 5px; }
+            .resource-group { flex-direction: column; }
+            .resource-column { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<audio id="success-sound" src="success.mp3" preload="auto"></audio>
+<audio id="error-sound" src="error.mp3" preload="auto"></audio>
+<audio id="finish-sound" src="finish.mp3" preload="auto"></audio>
+
+<section id="bienvenida" class="centrado flex-container" style="flex-direction: column; height: 100vh; background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%); color: white; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); margin: 0; border-radius: 0;">
+    <img src="gamification-students-classroom.jpeg" alt="Estudiantes en un aula gamificada" class="hero-img" style="max-width: 90%; width: 500px; height: auto; border-radius: 20px; border: 6px solid white; box-shadow: var(--shadow-epic); margin-bottom: 30px;">
+    <h1>¡Misión Gamificación Épica 2.0!</h1>
+    <p style="font-size: 1.5em; max-width: 800px; margin-bottom: 50px; font-weight: 500;">Esta aventura te desafiará con el doble de juegos, un laberinto de lógica y puntos extra. ¡Prepárate para ser el Maestro Gamificador!</p>
+    <button class="boton-juego" onclick="entrarJuegos()" style="background: white; color: var(--color-primary);">
+        Iniciar Desafío Principal <span class="material-icons" style="margin-left: 8px;">star_border</span>
+    </button>
+</section>
+
+<nav id="navbar" style="position: fixed; width: 100%; top: 0; left: 0; background: var(--color-dark); z-index: 1000; box-shadow: var(--shadow-epic); display:none; justify-content: center;">
+    <ul style="list-style: none; display: flex; margin: 0; padding: 0;">
+        <li><a href="#juegos-section" style="color: white; padding: 18px 25px; display: block; font-weight: 700; transition: background 0.3s;">🎯 Desafíos</a></li>
+        <li><a href="#contenidos" style="color: white; padding: 18px 25px; display: block; font-weight: 700; transition: background 0.3s;">💡 Contenidos</a></li>
+        <li><a href="#recursos" style="color: white; padding: 18px 25px; display: block; font-weight: 700; transition: background 0.3s;">🔗 Recursos</a></li>
+        <li><a href="#ranking" style="color: white; padding: 18px 25px; display: block; font-weight: 700; transition: background 0.3s;">🏆 Ranking</a></li>
+    </ul>
+</nav>
+
+<section id="juegos-section" style="display:none; padding-top: 50px;">
+    <h2 class="centrado">🎯 Nivel 1: Desafíos de Conceptos Clave</h2>
+    
+    <div class="scoreboard">
+        <div id="puntos">Puntos: 0</div>
+        <div class="insignia-container">
+            <img src="medalla3.png" alt="Insignia Bronce (10 Puntos)" class="insignia" id="insignia1">
+            <img src="medalla2.png" alt="Insignia Plata (25 Puntos)" class="insignia" id="insignia2">
+            <img src="medalla1.png" alt="Insignia Oro (50 Puntos)" class="insignia" id="insignia3">
+        </div>
+    </div>
+
+    <div id="quiz" class="game-block centrado">
+        <h3>1. 🧠 Quiz: El Foco del Comportamiento (5 Puntos)</h3>
+        <p style="font-weight: 600;">En la gamificación, ¿qué se intenta modificar principalmente en el estudiante?</p>
+        <div class="flex-container">
+            <button class="boton-juego" onclick="quizAnswer(this, false, 0, 'quizCompleted')">La Calificación</button>
+            <button class="boton-juego" onclick="quizAnswer(this, true, 5, 'quizCompleted')">El Comportamiento</button>
+            <button class="boton-juego" onclick="quizAnswer(this, false, 0, 'quizCompleted')">El Horario</button>
+        </div>
+        <p id="quizResult" class="result-message"></p>
+    </div>
+    
+    <div id="fillBlank" class="game-block centrado">
+        <h3>2. ✏️ La Esencia de la Diversión (7 Puntos)</h3>
+        <p>Completa la frase. La gamificación funciona al aplicar la **_______** de los juegos al ámbito educativo.</p>
+        <div class="flex-container" style="flex-direction: column;">
+            <p>La palabra es: <input type="text" id="blankInput" placeholder="Escribe aquí..." style="text-transform: uppercase; padding: 10px; border: 2px solid var(--color-secondary); border-radius: 8px; width: 250px; text-align: center; margin: 0 10px;"></p>
+            <button class="boton-juego" onclick="checkFillBlank()">Comprobar</button>
+            <p id="fillBlankResult" class="result-message"></p>
+        </div>
+    </div>
+
+    <div id="logicMaze" class="game-block centrado">
+        <h2>3. 🧩 Laberinto Lógico: La Ruta de la Motivación (15 Puntos)</h2>
+        <p>Encuentra la ruta lógica de 3 pasos que **fomenta la motivación a largo plazo** en la gamificación.</p>
+        <div id="logicMazeGrid">
+            <div class="maze-cell" data-step="1">Puntos</div>
+            <div class="maze-cell" data-step="1" data-correct="true">Autonomía</div>
+            <div class="maze-cell" data-step="1">Recompensa Externa</div>
+
+            <div class="maze-cell" data-step="2" data-correct="true">Dominio</div>
+            <div class="maze-cell" data-step="2">Castigo</div>
+            <div class="maze-cell" data-step="2">Líderes</div>
+
+            <div class="maze-cell" data-step="3">Niveles Fáciles</div>
+            <div class="maze-cell" data-step="3" data-correct="true">Propósito</div>
+            <div class="maze-cell" data-step="3">Monedas</div>
+        </div>
+        <button class="boton-juego" onclick="resetLogicMaze()">Reiniciar Laberinto</button>
+        <p id="logicMazeResult" class="result-message"></p>
+    </div>
+
+</section>
+
+<section id="contenidos">
+    <h2 class="centrado">💡 Material de Estudio (Coherencia Didáctica)</h2>
+    <hr>
+    
+    <div class="didactic-img-container">
+        <img src="Oct-20-Educational-Technology-Gamification-in-Education_web-1024x683.jpg" alt="Tecnología y Gamificación en Educación" class="didactic-img">
+        <p style="margin-top: 15px; font-style: italic; color: #666;">La **Gamificación** aplica el modelo PBL (Points, Badges, Leaderboards) para crear un entorno de **retroalimentación inmediata** y **reconocimiento**.</p>
+    </div>
+
+    <div class="video-container">
+        <h3>Videos de Profundización sobre Gamificación (¡Míralos para el desafío!)</h3>
+        
+        <ul class="video-list">
+            <li>
+                <span class="material-icons" style="vertical-align: middle; color: var(--color-primary);">play_circle</span>
+                <a href="https://youtu.be/FQ6dTXBVN8Y" target="_blank">Video 1: ¿Qué es la Gamificación?</a>
+            </li>
+            <li>
+                <span class="material-icons" style="vertical-align: middle; color: var(--color-primary);">play_circle</span>
+                <a href="https://youtu.be/E19u_bpKRLI" target="_blank">Video 2: Beneficios y Aplicaciones</a>
+            </li>
+            <li>
+                <span class="material-icons" style="vertical-align: middle; color: var(--color-primary);">play_circle</span>
+                <a href="https://youtu.be/1Jdjmq9WE1M" target="_blank">Video 3: Elementos Clave del Diseño</a>
+            </li>
+        </ul>
+        <p style="margin-top: 10px; font-style: italic;">*Estos videos contienen información esencial para superar los desafíos avanzados.</p>
+    </div>
+    <hr>
+</section>
+
+<section id="recursos">
+    <h2 class="centrado">🔗 Recursos y Plataformas de Gamificación</h2>
+    <p class="centrado" style="max-width: 800px; margin: 20px auto;">Explora las herramientas reales usadas para aplicar la gamificación en el aula y en casa.</p>
+    
+    <div class="resource-group">
+        <div class="resource-column">
+            <h4><span class="material-icons" style="vertical-align: middle; color: var(--color-secondary); margin-right: 8px;">school</span> Plataformas para Alumnos</h4>
+            <ul class="platform-list">
+                <li>
+                    <a href="https://kahoot.com/es" target="_blank">Kahoot!</a> - Cuestionarios interactivos.
+                </li>
+                <li>
+                    <a href="https://wayground.com/?lng=en" target="_blank">Wayground</a> - Aprendizaje basado en juegos.
+                </li>
+                <li>
+                    <a href="https://www.duolingo.com" target="_blank">Duolingo</a> - Aprender idiomas jugando.
+                </li>
+            </ul>
+        </div>
+        
+        <div class="resource-column">
+            <h4><span class="material-icons" style="vertical-align: middle; color: var(--color-secondary); margin-right: 8px;">people</span> Plataformas y Recursos para Padres/Docentes</h4>
+            <ul class="platform-list">
+                <li>
+                    <a href="https://www.classdojo.com" target="_blank">ClassDojo</a> - Gestión del aula y comunicación con padres.
+                </li>
+                <li>
+                    <a href="https://www.educaciontrespuntocero.com" target="_blank">Educación 3.0 (Recursos)</a> - Portal de innovación educativa.
+                </li>
+                <li>
+                    <a href="https://www.educaciontrespuntocero.com" target="_blank">Educación 3.0 (Guías)</a> - Guías y noticias sobre tecnología y educación.
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+<section id="ranking" class="centrado">
+    <h2>🏆 Muro de la Fama: El Ranking Global</h2>
+    <p>¡Solo los mejores Gamificadores llegan aquí! Tu posición se actualiza con cada desafío.</p>
+    
+    <table id="ranking-table" style="width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 30px;">
+        <thead>
+            <tr style="background-color: var(--color-dark); color: white;">
+                <th style="padding: 15px;">#</th>
+                <th style="padding: 15px;">Jugador</th>
+                <th style="padding: 15px;">Puntos Totales</th>
+                <th style="padding: 15px;">Insignias</th>
+            </tr>
+        </thead>
+        <tbody id="ranking-body">
+            <tr id="current-player-row" class="rank-highlight" style="background-color: var(--color-primary) !important; color: white;">
+                <td>-</td>
+                <td>Tú (Jugador Actual)</td>
+                <td id="rank-points">0</td>
+                <td id="rank-badges">0</td>
+            </tr>
+            <tr><td>1</td><td>MasterEducativo99</td><td>80</td><td>3</td></tr>
+            <tr><td>2</td><td>JuegoProX</td><td>55</td><td>2</td></tr>
+            <tr><td>3</td><td>AprendizFeliz</td><td>30</td><td>1</td></tr>
+        </tbody>
+    </table>
+</section>
+
+
+<script>
+    /* ====================================================================
+        ADVANCED GAME SCRIPT (Lógica del Juego y Multimedia)
+        ==================================================================== */
+
+    // 1. ESTADO CENTRALIZADO
+    const gameState = {
+        points: 0,
+        quizCompleted: false,
+        fillBlankCompleted: false,
+        logicMazeCompleted: false,
+        memoryPairs: 0,
+        memoryMaxPairs: 4,
+        flippedCards: [],
+        correctDrops: 0,
+        totalBadges: 0,
+        // Nuevo estado para el laberinto
+        logicMazeStep: 0, // 0: No iniciado, 1: Primer paso, 2: Segundo paso, 3: Completo
+        logicMazeSolution: ["Autonomía", "Dominio", "Propósito"] // La secuencia correcta de la Motivación Intrínseca
+    };
+
+    // 2. UTILIDADES Y MANIPULACIÓN DEL DOM (UI/View Logic)
+    const UIManager = {
+        getCssVar: (variable) => getComputedStyle(document.documentElement).getPropertyValue(variable).trim(),
+        playFeedback(isCorrect) {
+            // Lógica de audio (Asegúrate de tener los archivos 'success.mp3', 'error.mp3', 'finish.mp3')
+            const soundElement = isCorrect ? document.getElementById('success-sound') : document.getElementById('error-sound');
+            if (soundElement) {
+                soundElement.currentTime = 0;
+                soundElement.play().catch(e => console.log("Audio play failed:", e));
+            }
+        },
+
+        updatePointsDisplay(oldPoints, newPoints) {
+            document.getElementById('puntos').textContent = `Puntos: ${newPoints}`;
+            const puntosElement = document.getElementById('puntos');
+            puntosElement.classList.add('points-added');
+
+            setTimeout(() => { puntosElement.classList.remove('points-added'); }, 500);
+
+            // Lógica de insignias (Valores más altos para "Super Avanzado")
+            let newBadges = gameState.totalBadges;
+            if (newPoints >= 10 && oldPoints < 10) { document.getElementById('insignia1').classList.add('ganada'); newBadges++; this.playFeedback(true); }
+            if (newPoints >= 25 && oldPoints < 25) { document.getElementById('insignia2').classList.add('ganada'); newBadges++; }
+            if (newPoints >= 50 && oldPoints < 50) { document.getElementById('insignia3').classList.add('ganada'); newBadges++; }
+            
+            gameState.totalBadges = newBadges;
+            this.updateRankingTable();
+        },
+        
+        updateRankingTable() {
+            // Lógica de actualización del ranking
+            document.getElementById('rank-points').textContent = gameState.points;
+            const badgesCount = document.querySelectorAll('.insignia.ganada').length;
+            document.getElementById('rank-badges').textContent = badgesCount;
+            
+            // Simulación de clasificación
+            const currentPoints = gameState.points;
+            let rank = 4;
+            if (currentPoints >= 80) rank = 1;
+            else if (currentPoints >= 55) rank = 2;
+            else if (currentPoints >= 30) rank = 3;
+            
+            document.getElementById('current-player-row').querySelector('td').textContent = rank < 4 ? rank : '-';
+        },
+
+        showResult(element, isCorrect, message) {
+            // Muestra mensaje genérico de resultado
+            const color = isCorrect ? this.getCssVar('--color-success') : this.getCssVar('--color-error');
+            element.innerHTML = message;
+            element.style.color = color;
+            this.playFeedback(isCorrect);
+        },
+
+        // Inicializa el Laberinto al cargar
+        initLogicMaze() {
+            const cells = document.querySelectorAll('#logicMazeGrid .maze-cell');
+            cells.forEach(cell => {
+                cell.onclick = () => GameManager.handleLogicMazeClick(cell);
+            });
+            GameManager.updateLogicMazeUI();
+        }
+    };
+
+    // 3. LÓGICA DEL JUEGO
+    const GameManager = {
+        addPoints(value) {
+            const oldPoints = gameState.points;
+            gameState.points += value;
+            UIManager.updatePointsDisplay(oldPoints, gameState.points);
+        },
+
+        handleQuizAnswer(btn, isCorrect, points, gameKey) {
+            if (gameState[gameKey]) return;
+            const parent = btn.closest('#quiz');
+            const resultElement = parent.querySelector('.result-message');
+            parent.querySelectorAll('.boton-juego').forEach(b => b.disabled = true);
+            gameState[gameKey] = true;
+
+            UIManager.showResult(resultElement, isCorrect, isCorrect ? `¡Correcto! Ganaste ${points} puntos. 🎉` : 'Incorrecto. La respuesta es "El Comportamiento".');
+
+            if (isCorrect) {
+                btn.style.backgroundColor = UIManager.getCssVar('--color-success');
+                btn.style.color = 'white';
+                this.addPoints(points);
+            } else {
+                btn.style.backgroundColor = UIManager.getCssVar('--color-error');
+                btn.style.color = 'white';
+            }
+        },
+
+        checkFillBlank() {
+            if (gameState.fillBlankCompleted) return;
+            const input = document.getElementById('blankInput');
+            const resultElement = document.getElementById('fillBlankResult');
+            const answer = input.value.trim().toUpperCase();
+            const correctWord = "DIVERSIÓN"; // Concepto central de la gamificación
+
+            if (answer === correctWord) {
+                gameState.fillBlankCompleted = true;
+                this.addPoints(7);
+                input.disabled = true;
+                input.style.borderColor = UIManager.getCssVar('--color-success');
+                UIManager.showResult(resultElement, true, "¡Fantástico! La clave es la **DIVERSIÓN**. ¡Ganaste 7 puntos! 🎉");
+            } else {
+                UIManager.showResult(resultElement, false, "Respuesta incorrecta. Pista: Es lo que hace un juego *atractivo*.");
+            }
+        },
+
+        // JUEGO: LABERINTO LÓGICO
+        handleLogicMazeClick(cell) {
+            if (gameState.logicMazeCompleted) return;
+
+            const clickedConcept = cell.textContent;
+            const currentStepIndex = gameState.logicMazeStep;
+            
+            if (clickedConcept === gameState.logicMazeSolution[currentStepIndex]) {
+                cell.classList.add('correct');
+                cell.classList.remove('current-step');
+                gameState.logicMazeStep++;
+                this.addPoints(5); // 5 puntos por paso correcto
+
+                if (gameState.logicMazeStep === 3) {
+                    gameState.logicMazeCompleted = true;
+                    this.addPoints(15); // 15 puntos extra por completar
+                    UIManager.showResult(document.getElementById('logicMazeResult'), true, "¡¡RUTA ÉPICA COMPLETADA!! (Autonomía > Dominio > Propósito) ¡+15 Puntos Extra! 🏆");
+                    // document.getElementById('finish-sound').play(); // Descomentar si tienes el archivo
+                } else {
+                    UIManager.showResult(document.getElementById('logicMazeResult'), true, `Paso ${gameState.logicMazeStep}/3 correcto. ¡Sigue la ruta!`);
+                    this.updateLogicMazeUI();
+                }
+            } else {
+                cell.classList.add('incorrect');
+                UIManager.showResult(document.getElementById('logicMazeResult'), false, "¡ERROR! Ese no es el siguiente pilar de la motivación intrínseca. Reinicia.");
+                setTimeout(() => {
+                    cell.classList.remove('incorrect');
+                    this.resetLogicMaze();
+                }, 1000);
+            }
+        },
+
+        updateLogicMazeUI() {
+            const cells = document.querySelectorAll('#logicMazeGrid .maze-cell');
+            cells.forEach(cell => cell.classList.remove('current-step'));
+
+            if (gameState.logicMazeStep < 3) {
+                // Marca las celdas del paso actual para guía visual
+                cells.forEach(cell => {
+                    if (cell.getAttribute('data-step') == gameState.logicMazeStep + 1 && !cell.classList.contains('correct')) {
+                        cell.classList.add('current-step');
+                    }
+                });
+            }
+        },
+
+        resetLogicMaze() {
+            gameState.logicMazeStep = 0;
+            gameState.logicMazeCompleted = false;
+            const cells = document.querySelectorAll('#logicMazeGrid .maze-cell');
+            cells.forEach(cell => {
+                cell.classList.remove('correct', 'incorrect', 'current-step');
+                cell.onclick = () => GameManager.handleLogicMazeClick(cell);
+            });
+            document.getElementById('logicMazeResult').innerHTML = "";
+            this.updateLogicMazeUI();
+        }
+    };
+
+    // 4. FUNCIONES GLOBALES Y ENTRADA
+    function entrarJuegos() {
+        document.getElementById('bienvenida').style.display = 'none';
+        document.getElementById('juegos-section').style.display = 'block';
+        document.getElementById('navbar').style.display = 'flex';
+        // Desplazamiento suave al inicio de los juegos
+        document.getElementById('juegos-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function quizAnswer(btn, isCorrect, points, gameKey) {
+        GameManager.handleQuizAnswer(btn, isCorrect, points, gameKey);
+    }
+    
+    function checkFillBlank() {
+        GameManager.checkFillBlank();
+    }
+    
+    function resetLogicMaze() {
+        GameManager.resetLogicMaze();
+    }
+
+    // Inicialización al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+        UIManager.initLogicMaze();
+        UIManager.updateRankingTable(); // Carga el ranking inicial
+    });
+</script>
+
+</body>
+</html>
